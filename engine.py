@@ -2,18 +2,15 @@ from FeatureEngineering import simulate_price_linear, find_optimal_price_revenue
 
 def price_recommendation_engine(df, linear_model, current_price, cost_price=0):
 
-    # 1. Predict current performance
     curr = simulate_price_linear(linear_model, current_price, cost_per_unit=cost_price)
 
-    # 2. Find optimal price for maximum revenue
     best = find_optimal_price_revenue(linear_model,
                                       price_min=float(df['Sale_Price'].min()),
                                       price_max=float(df['Sale_Price'].max())*1.5)
-
     best_price = best['Price']
     best_revenue = best['Revenue']
 
-    # 3. Elasticity check
+    #  Elasticity check
     elasticity_now = curr['Elasticity']
 
     if elasticity_now < -1:
@@ -26,14 +23,14 @@ def price_recommendation_engine(df, linear_model, current_price, cost_price=0):
         elasticity_label = "Inelastic (Some sensitivity)"
         action = "Small price changes won't affect sales much"
 
-    # 4. Competitor comparison
+    #  Competitor comparison
     avg_comp_price = df['Comp_Price'].mean()
     if current_price > avg_comp_price:
         comp_msg = "You are priced ABOVE competitor average"
     else:
         comp_msg = "You are priced BELOW competitor average"
 
-    # 5. Season impact
+    #  Season impact
     if 'Seasonal_Index' in df.columns:
         season_avg = df['Seasonal_Index'].mean()
         if season_avg > 1.05:
@@ -45,7 +42,7 @@ def price_recommendation_engine(df, linear_model, current_price, cost_price=0):
     else:
         season_msg = "No season data available"
 
-    # 6. Full recommendation
+    #  Full recommendation
     return {
         "Current_Price": current_price,
         "Current_Elasticity": elasticity_now,
